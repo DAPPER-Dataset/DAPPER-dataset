@@ -1,23 +1,56 @@
 # DAPPER-dataset
-DAPPER: a 13,000-prompt dataset unifying PII detection, anonymization-technique selection and intent-preserving rewriting for privacy-aware LLM prompts. Accepted at SLAAI-ICAI 2026.
 
-The privacy awareness prompt enhancement dataset is designed to identify, classify, and remove the PII data present in user prompts for LLM applications. It further provides an improved, privacy-safe prompt version with enhanced responsible AI interactions. Synthetic Data as a key enabler for fair and privacy-preserving AI research. A significant advantage of the proposed dataset is the extensive use of synthetically generated prompts, representing 90% of all records. There are two files in the dataset, one for training and the other for testing. 
+**Detecting and Anonymizing Personally Identifiable Information for Privacy-Aware Prompt Enhancement**
 
-## Dataset Content
+DAPPER is a dataset of 13,000 LLM user prompts that unifies three tasks in one consistently labeled schema: **PII detection**, **anonymization-technique selection**, and **intent-preserving prompt rewriting**.
 
-There are two dataset files for training and testing purposes. Formally, the dataset presents both CSV and Excel file formats. Sample raw data in both table and CSV format is shown in Table I and Figure 1 in the accompanying paper.
+> Accepted at the SLAAI International Conference on Artificial Intelligence (SLAAI-ICAI 2026).
 
-Each categorization includes 2,600 samples, where 1,300 samples are for anonymization, while 1,300 serve as clean reference prompts in the  both traning and testing dataset. This structure ensures a balanced dataset suitable for both binary classification (PII vs non-PII) and multi-class anonymization analysis.
+## Why DAPPER?
+
+Existing PII resources usually cover a single task (detection, span-level masking, or sensitivity classification). DAPPER pairs every prompt with a detection label, the extracted PII values, an anonymization technique, and a rewritten prompt, so a full detection-to-rewriting pipeline can be trained and evaluated on one resource.
+
+A distinguishing property is **contextual anonymization**: a rewritten prompt may keep a PII-like value (for example a birthdate) when the value no longer identifies the user once the identifying link is removed.
+
+> Original: *"I was born on 2000-01-01. What is my age today?"*
+> Improved: *"If someone was born on 2000-01-01, what is their age today?"*
+
+The entry is still labeled as containing PII, but the value is no longer attributable to a specific individual. **This is not a formal privacy guarantee** (see [Limitations](#limitations)).
+
+## Dataset at a glance
+
+| Item            | Value                                                                                         |
+|-----------------|-----------------------------------------------------------------------------------------------|
+| Total prompts   | 13,000                                                                                        |
+| Training split  | 10,000                                                                                        |
+| Test split      | 3,000                                                                                         |
+| Sampling groups | 5 (4 PII categories + Mixed/Combined), 2,600 prompts each (2,000 train / 600 test)            |
+| Language        | English                                                                                       |
+| Origin          | ≈9.6% manually curated (1,250 prompts), remainder synthetically generated with Gemini 2.5 Pro |
+
+### PII categories
+
+1. Medical & Demographic
+2. Location & Contact Information
+3. Financial & Identification
+4. Employment, Education & Social Information
+5. Mixed/Combined (multi-category prompts)
 
 ## Columns Description
 
-| Column Name            | Description                                                                 |
-|--------------------    |-----------------------------------------------------------------------------|
-| Original               | The original user prompt for LLM.                                           |
-| Need Anonymization     | Indicates if the prompt contains PII requiring anonymization (YES/NO).      |
-| Detect PII Values      | The detected PII values of the prompt with type (age, gender, etc.) in JSON format. |
-| Anonymization Technique| Used anonymization techniques for the make the improved propmt              |
-| Improved Prompt        | The suggested improved prompt excludes sensitive information while preserving meaning. |
+| Column Name            | Description                                                                           |
+|--------------------    |---------------------------------------------------------------------------------------|
+| Original               | The original user prompt for LLM.                                                     |
+| Need Anonymization     | Indicates if the prompt contains PII requiring anonymization (YES/NO).                |
+| Detect PII Values      | The detected PII values of the prompt with type (age, gender, etc.) in JSON format.   |
+| Anonymization Technique| Used anonymization techniques for the make the improved propmt                        |
+| Improved Prompt        | The suggested improved prompt excludes sensitive information while preserving meaning.|
+
+Anonymization techniques:
+
+- **Generalization**: replaces a specific value with a less precise one (e.g. an exact age becomes an age range).
+- **Pseudonymization**: keeps the value but breaks the link to the user, typically via hypothetical or third-person framing.
+- **Masking**: removes or obscures PII directly; used when the source text must stay otherwise unmodified.
 
 - The dataset presents 6,500 prompts that need anonymization and 6,500 prompts that do not.
 - The detected PII values show types and exact values using JSON object notation.
@@ -27,12 +60,31 @@ Each categorization includes 2,600 samples, where 1,300 samples are for anonymiz
 
 This dataset can be used for developing and evaluating privacy-preserving anonymization techniques on user prompts for LLMs. The improved prompts are designed to exclude sensitive information without damaging the original prompt's meaning.
 
+## Limitations
+
+- Mostly synthetic data generated by a single LLM (possible reduced diversity and model bias).
+- Labels are partly verified by humans; see the audit subset and the paper for error rates.
+- LLM-as-a-Judge scores are not a re-identification risk measure.
+- English only; four PII categories plus a mixed group.
+- Contextual anonymization removes identifying links, not all identifying values, and offers no formal guarantee such as differential privacy or k-anonymity.
+
+## Ethics
+
+The dataset contains no real user data. Entries are manually authored or synthetically generated and were reviewed to exclude real PII. If you find an entry that looks like real personal data, please open an issue so it can be removed.
+
+## Evaluation summary
+
+The paper reports semantic preservation (BERTScore F1, SBERT cosine), an LLM-as-a-Judge evaluation, and downstream benchmarks of lightweight models (DistilBERT, Gemma-3-1B with LoRA) against Microsoft Presidio. Please refer to the paper for definitions, subsets, and final numbers.
+
 ## License
 
 This dataset is licensed under the MIT License.  
 You may copy and redistribute the dataset in any medium or format, under the conditions that you give attribution and do NOT distribute modified versions.  
 See the LICENSE file for full details.
 
+Dataset DOI: `https://doi.org/ADD_ZENODO_DOI`
 
+## Contact
+ Email : sahaswari.senanayaka@gmail.com
 
 
